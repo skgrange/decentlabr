@@ -12,7 +12,11 @@
 #' 
 #' @param start Start date to get time series for. 
 #' 
+#' @param end End date to get time series for
+#' 
 #' @param as_wide Should the return be in "wide" format? 
+#' 
+#' @param tz Time-zone for the time series to be returned in. 
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
@@ -22,8 +26,8 @@
 #' 
 #' @export
 get_decent_lab_time_series <- function(domain, key, device, sensor = NA, 
-                                       start = NA, as_wide = FALSE, 
-                                       verbose = FALSE) {
+                                       start = NA, end = NA, as_wide = FALSE, 
+                                       tz = "UTC", verbose = FALSE) {
   
   device %>% 
     purrr::map_dfr(
@@ -33,7 +37,9 @@ get_decent_lab_time_series <- function(domain, key, device, sensor = NA,
         device = .,
         sensor = sensor,
         start = start,
+        end = end,
         as_wide = as_wide,
+        tz = tz,
         verbose = verbose
       )
     )
@@ -42,7 +48,7 @@ get_decent_lab_time_series <- function(domain, key, device, sensor = NA,
 
 
 get_decent_lab_time_series_worker <- function(domain, key, device, sensor, 
-                                              start, as_wide, verbose) {
+                                              start, end, as_wide, tz, verbose) {
   
   # Message to user
   if (verbose) message(date_message(), "Querying device `", device, "`...")
@@ -60,13 +66,27 @@ get_decent_lab_time_series_worker <- function(domain, key, device, sensor,
     device <- stringr::str_c("/", device, "/")
   }
   
+  # Parse missing dates
   if (is.na(start)) {
     start <- lubridate::now() %>% 
       lubridate::floor_date("year") %>% 
       format()
   }
   
-  #
+  if (is.na(end)) {
+    end <- lubridate::now() %>% 
+      lubridate::ceiling_date("year") %>% 
+      format()
+  }
+  
+  # Build time filter string
+  time_filter <- glue::glue(
+    "time >= '", start, "' AND time <= '", end, "'"
+  ) %>% 
+    as.character()
+  
+  # Query API
+  # TODO: Handle errors better
   df <- tryCatch({
     query(
       domain = domain,
@@ -75,8 +95,8 @@ get_decent_lab_time_series_worker <- function(domain, key, device, sensor,
       doCast = FALSE,
       device = device, 
       sensor = sensor, 
-      timeFilter = stringr::str_c("time >= '", start, "'"),
-      timezone = "UTC"
+      timeFilter = time_filter,
+      timezone = tz
     ) 
   }, error = function(e) {
     tibble()

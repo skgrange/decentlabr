@@ -10,7 +10,9 @@ get_decent_lab_time_series(
   device,
   sensor = NA,
   start = NA,
+  end = NA,
   as_wide = FALSE,
+  tz = "UTC",
   verbose = FALSE
 )
 }
@@ -25,7 +27,11 @@ get_decent_lab_time_series(
 
 \item{start}{Start date to get time series for.}
 
+\item{end}{End date to get time series for}
+
 \item{as_wide}{Should the return be in "wide" format?}
+
+\item{tz}{Time-zone for the time series to be returned in.}
 
 \item{verbose}{Should the functions give messages?}
 }
