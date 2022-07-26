@@ -24,6 +24,37 @@
 #' 
 #' @return Tibble. 
 #' 
+#' @examples 
+#' 
+#' # Get a device's observations for a short time period
+#' get_decent_lab_time_series(
+#'   domain = "demo.decentlab.com",
+#'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+#'   device = 3001,
+#'   start = lubridate::today() - lubridate::days(1),
+#'   end = lubridate::today() + lubridate::days(1)
+#' )
+#' 
+#' # Just get CO2 for the sensor
+#' get_decent_lab_time_series(
+#'   domain = "demo.decentlab.com",
+#'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+#'   device = 3001,
+#'   sensor = "senseair-lp8-co2",
+#'   start = lubridate::today() - lubridate::days(1),
+#'   end = lubridate::today() + lubridate::days(1)
+#' )
+#' 
+#' # Get a device's observations for a short time period in wide format
+#' get_decent_lab_time_series(
+#'   domain = "demo.decentlab.com",
+#'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+#'   device = 3001,
+#'   start = lubridate::today() - lubridate::days(1),
+#'   end = lubridate::today() + lubridate::days(1),
+#'   as_wide = TRUE
+#' )
+#' 
 #' @export
 get_decent_lab_time_series <- function(domain, key, device, sensor = NA, 
                                        start = NA, end = NA, as_wide = FALSE, 
@@ -67,17 +98,11 @@ get_decent_lab_time_series_worker <- function(domain, key, device, sensor,
   }
   
   # Parse missing dates
-  if (is.na(start)) {
-    start <- lubridate::now() %>% 
-      lubridate::floor_date("year") %>% 
-      format()
-  }
+  start <- parse_date_arguments(start, type = "start") %>% 
+    str_date_formatted(time_zone = FALSE, fractional_seconds = FALSE)
   
-  if (is.na(end)) {
-    end <- lubridate::now() %>% 
-      lubridate::ceiling_date("year") %>% 
-      format()
-  }
+  end <- parse_date_arguments(end, type = "end") %>% 
+    str_date_formatted(time_zone = FALSE, fractional_seconds = FALSE)
   
   # Build time filter string
   time_filter <- glue::glue(
@@ -102,9 +127,10 @@ get_decent_lab_time_series_worker <- function(domain, key, device, sensor,
     tibble()
   })
   
-  
+  # If no data, return here
   if (nrow(df) == 0L) return(tibble())
   
+  # When data are available
   df <- df %>% 
     as_tibble() %>% 
     rename(date = time) %>% 

@@ -17,6 +17,15 @@ Tibble.
 \description{
 Function to get observational data from the Decentlab API.
 }
+\examples{
+
+# Get last values for Dencentlab's demo user
+get_decent_lab_last_values(
+  domain = "demo.decentlab.com",
+  key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9"
+)
+
+}
 \author{
 Stuart K. Grange
 }

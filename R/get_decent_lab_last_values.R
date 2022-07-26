@@ -8,19 +8,30 @@
 #' 
 #' @return Tibble. 
 #' 
+#' @examples 
+#' 
+#' # Get last values for Dencentlab's demo user
+#' get_decent_lab_last_values(
+#'   domain = "demo.decentlab.com",
+#'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9"
+#' )
+#' 
 #' @export
 get_decent_lab_last_values <- function(domain, key) {
   
   getLast(domain = domain, apiKey = key) %>% 
     as_tibble() %>% 
     rename(date = time) %>% 
-    mutate(across(c("channel", "location"), ~if_else(. == "", NA_character_, .)),
-           device =  stringr::str_split_fixed(uqk, "\\.", n = 2)[, 1],
-           device = as.integer(device)) %>% 
+    mutate(
+      across(c("channel", "location", "unit"), ~if_else(. == "", NA_character_, .)),
+      device =  stringr::str_split_fixed(uqk, "\\.", n = 2)[, 1]
+    ) %>% 
     relocate(date,
              device,
              sensor,
              unit,
-             value)
+             value) %>% 
+    arrange(device,
+            sensor)
   
 }

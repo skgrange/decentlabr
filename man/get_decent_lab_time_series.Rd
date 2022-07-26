@@ -41,6 +41,38 @@ Tibble.
 \description{
 Function to get observational data from the Decentlab API.
 }
+\examples{
+
+# Get a device's observations for a short time period
+get_decent_lab_time_series(
+  domain = "demo.decentlab.com",
+  key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+  device = 3001,
+  start = lubridate::today() - lubridate::days(1),
+  end = lubridate::today() + lubridate::days(1)
+)
+
+# Just get CO2 for the sensor
+get_decent_lab_time_series(
+  domain = "demo.decentlab.com",
+  key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+  device = 3001,
+  sensor = "senseair-lp8-co2",
+  start = lubridate::today() - lubridate::days(1),
+  end = lubridate::today() + lubridate::days(1)
+)
+
+# Get a device's observations for a short time period in wide format
+get_decent_lab_time_series(
+  domain = "demo.decentlab.com",
+  key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
+  device = 3001,
+  start = lubridate::today() - lubridate::days(1),
+  end = lubridate::today() + lubridate::days(1),
+  as_wide = TRUE
+)
+
+}
 \seealso{
 \code{\link{get_decent_lab_last_values}}
 }
