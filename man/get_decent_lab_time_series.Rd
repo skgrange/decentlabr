@@ -8,7 +8,6 @@ get_decent_lab_time_series(
   domain,
   key,
   device,
-  sensor = NA,
   start = NA,
   end = NA,
   as_wide = FALSE,
@@ -22,8 +21,6 @@ get_decent_lab_time_series(
 \item{key}{A Decentlab API key for \code{domain}.}
 
 \item{device}{A vector of device codes.}
-
-\item{sensor}{A vector of device's sensor codes.}
 
 \item{start}{Start date to get time series for.}
 
@@ -48,16 +45,6 @@ get_decent_lab_time_series(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
   device = 3001,
-  start = lubridate::today() - lubridate::days(1),
-  end = lubridate::today() + lubridate::days(1)
-)
-
-# Just get CO2 for the sensor
-get_decent_lab_time_series(
-  domain = "demo.decentlab.com",
-  key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
-  device = 3001,
-  sensor = "senseair-lp8-co2",
   start = lubridate::today() - lubridate::days(1),
   end = lubridate::today() + lubridate::days(1)
 )
