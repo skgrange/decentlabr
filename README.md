@@ -47,7 +47,7 @@ get_decent_lab_last_values(
 
 To get the observations for a time series, the device must be known. Say a user was interested in CO~2~ concentrations, a low-cost sensor with the device number of 1404 can be accessed with these demo credentials. 
 
-```
+``` r
 # Get time series for a particular device
 get_decent_lab_last_values(
   domain = "demo.decentlab.com",
@@ -78,7 +78,7 @@ get_decent_lab_last_values(
 
 After the device is known, this is simply passed to the `get_decent_lab_time_series` function that will get/import/fetch the data that is available for the device. To get data for the device for the first day of 2021, `get_decent_lab_time_series` is used like this: 
 
-```
+``` r
 # Get the time series for a device for a short time period
 get_decent_lab_time_series(
   domain = "demo.decentlab.com",
@@ -107,7 +107,7 @@ get_decent_lab_time_series(
 
 Currently, all sensors' data will be returned for each device when using `get_decent_lab_time_series`, but this will likely change in the future. By default, the observations are provided in "long" format, but to reshape these data to wide format, use the `as_wide` argument: 
 
-```
+``` r
 get_decent_lab_time_series(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
