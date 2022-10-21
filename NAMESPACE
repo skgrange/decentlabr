@@ -2,6 +2,7 @@
 
 export("%>%")
 export(":=")
+export(decentlab_variables_look_up)
 export(export_decentlab_time_series)
 export(get_decentlab_last_values)
 export(get_decentlab_time_series)

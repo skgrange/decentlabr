@@ -9,6 +9,7 @@ read_decentlab_api_export(
   file,
   df_site_ranges = NA,
   df_sensing_elements_ranges = NA,
+  variable_switch = FALSE,
   date_round = FALSE
 )
 }
@@ -20,6 +21,9 @@ read_decentlab_api_export(
 
 \item{df_sensing_elements_ranges}{An optional data frame containing sensing
 element information.}
+
+\item{variable_switch}{Should the variables be switched to "clean" names and
+filtered to those contained in \code{\link{decentlab_variables_look_up}}.}
 
 \item{date_round}{Should the dates be rounded to seconds? Sometimes, the API
 returns data with sub-second accuracy.}

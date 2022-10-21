@@ -11,6 +11,9 @@
 #' @param df_sensing_elements_ranges An optional data frame containing sensing
 #' element information. 
 #' 
+#' @param variable_switch Should the variables be switched to "clean" names and
+#' filtered to those contained in \code{\link{decentlab_variables_look_up}}.
+#' 
 #' @param date_round Should the dates be rounded to seconds? Sometimes, the API
 #' returns data with sub-second accuracy. 
 #' 
@@ -21,6 +24,7 @@
 #' @export
 read_decentlab_api_export <- function(file, df_site_ranges = NA, 
                                       df_sensing_elements_ranges = NA,
+                                      variable_switch = FALSE,
                                       date_round = FALSE) {
   
   purrr::map_dfr(
@@ -29,6 +33,7 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
       file = .,
       df_site_ranges = df_site_ranges,
       df_sensing_elements_ranges = df_sensing_elements_ranges,
+      variable_switch = variable_switch,
       date_round = date_round
     )
   )
@@ -38,7 +43,7 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
 
 read_decentlab_api_export_worker <- function(file, df_site_ranges, 
                                              df_sensing_elements_ranges,
-                                             date_round) {
+                                             variable_switch, date_round) {
   
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
@@ -72,6 +77,16 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   df <- tidyr::pivot_longer(
     df, -c(date, sensor_id, sensor_type), names_to = "variable"
   )
+  
+  # Use variable names to switch name and filter table
+  if (variable_switch) {
+    df <- df %>% 
+      inner_join(decentlab_variables_look_up(), by = c("sensor_type", "variable")) %>% 
+      select(-variable) %>% 
+      rename(variable = variable_clean) %>% 
+      relocate(variable,
+               .after = sensor_type)
+  }
   
   # Join sites if a table was passed to function
   df <- join_sites_by_date_range(df, df_site_ranges)
