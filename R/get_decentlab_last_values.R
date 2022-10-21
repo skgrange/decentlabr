@@ -11,13 +11,13 @@
 #' @examples 
 #' 
 #' # Get last values for Dencentlab's demo user
-#' get_decent_lab_last_values(
+#' get_decentlab_last_values(
 #'   domain = "demo.decentlab.com",
 #'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9"
 #' )
 #' 
 #' @export
-get_decent_lab_last_values <- function(domain, key) {
+get_decentlab_last_values <- function(domain, key) {
   
   getLast(domain = domain, apiKey = key) %>% 
     as_tibble() %>% 

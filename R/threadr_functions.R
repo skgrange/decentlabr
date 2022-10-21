@@ -92,3 +92,108 @@ parse_date_arguments <- function(date, type, tz = "UTC") {
   return(date)
   
 }
+
+
+parse_unix_time <- function(x, tz = "UTC", origin = "1970-01-01") {
+  as.POSIXct(x, tz = tz, origin = origin)
+}
+
+
+add_by_id_and_range <- function(df, test, df_map, by, min, max, add) {
+  
+  # TODO: make number of `by` generic. How does one dynamically construct the 
+  # if_else testing statement? 
+  
+  # Check inputs
+  stopifnot(c(test, by) %in% names(df))
+  stopifnot(c(by, add, min, max) %in% names(df_map))
+  stopifnot(length(by) <= 3)
+  
+  # Determine what NA type to use
+  na_type <- df_map %>% 
+    select(!!add) %>% 
+    pull() %>% 
+    get_na_type()
+  
+  # Pre-allocate variable
+  df <- mutate(df, !!add := na_type)
+  
+  # Test and replace
+  for (i in seq_len(nrow(df_map))) {
+    
+    # For when there is only one identifier
+    if (length(by) == 1L) {
+      
+      # Repeatedly mutate in place
+      df <- df %>%
+        mutate(
+          !!add := if_else(
+            !!sym(by) == !!df_map[i, by, drop = TRUE] &
+              !!sym(test) >= !!df_map[i, min, drop = TRUE] &
+              !!sym(test) <= !!df_map[i, max, drop = TRUE],
+            !!df_map[i, add, drop = TRUE],
+            !!sym(add)
+          )
+        )
+      
+      # For when there are two identifiers
+    } else if (length(by) == 2L) {
+      
+      # Repeatedly mutate in place
+      df <- df %>%
+        mutate(
+          !!add := if_else(
+            !!sym(by[1]) == !!df_map[i, by[1], drop = TRUE] &
+              !!sym(by[2]) == !!df_map[i, by[2], drop = TRUE] &
+              !!sym(test) >= !!df_map[i, min, drop = TRUE] &
+              !!sym(test) <= !!df_map[i, max, drop = TRUE],
+            !!df_map[i, add, drop = TRUE],
+            !!sym(add)
+          )
+        )
+      
+      # For when there are three identifiers 
+    } else if (length(by) == 3L) {
+      
+      # Repeatedly mutate in place
+      df <- df %>%
+        mutate(
+          !!add := if_else(
+            !!sym(by[1]) == !!df_map[i, by[1], drop = TRUE] &
+              !!sym(by[2]) == !!df_map[i, by[2], drop = TRUE] &
+              !!sym(by[3]) == !!df_map[i, by[3], drop = TRUE] &
+              !!sym(test) >= !!df_map[i, min, drop = TRUE] &
+              !!sym(test) <= !!df_map[i, max, drop = TRUE],
+            !!df_map[i, add, drop = TRUE],
+            !!sym(add)
+          )
+        )
+      
+    }
+    
+  }
+  
+  return(df)
+  
+}
+
+
+get_na_type <- function(x) {
+  
+  if (is.logical(x)) {
+    na_type <- as.logical(NA)
+  } else if (is.integer(x)) {
+    na_type <- as.integer(NA)
+  } else if (is.double(x) && !lubridate::is.POSIXct(x)) {
+    na_type <- as.numeric(NA)
+  } else if (is.character(x)) {
+    na_type <- as.character(NA)
+  } else if (is.factor(x)) {
+    na_type <- as.factor(NA)
+  } else if (lubridate::is.POSIXct(x)) {
+    na_type <- lubridate::NA_POSIXct_
+  }
+  
+  return(na_type)
+  
+}

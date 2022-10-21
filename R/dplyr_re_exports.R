@@ -16,3 +16,13 @@ NULL
 #' @rdname pipe
 #' @export
 NULL
+
+
+#' Pseudo-function to re-export \strong{rlang}'s walrus operator.
+#'
+#' @importFrom rlang :=
+#' @name :=
+#' @rdname walrus
+#' @export
+NULL
+

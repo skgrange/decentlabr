@@ -17,18 +17,18 @@
 #' 
 #' @author Stuart K. Grange
 #' 
-#' @seealso \code{\link{get_decent_lab_time_series}}
+#' @seealso \code{\link{get_decentlab_time_series}}
 #' 
 #' @return Invisible \code{domain}.
 #' 
 #' @export
-export_decent_lab_time_series <- function(domain, key, device, start, end,
+export_decentlab_time_series <- function(domain, key, device, start, end,
                                           directory, verbose = FALSE) {
   
   # Get data and export daily files into a directory
   device %>% 
     purrr::walk(
-      ~export_decent_lab_time_series_worker(
+      ~export_decentlab_time_series_worker(
         domain = domain, 
         key = key,
         device = .,
@@ -44,11 +44,11 @@ export_decent_lab_time_series <- function(domain, key, device, start, end,
 }
 
 
-export_decent_lab_time_series_worker <- function(domain, key, device, start,
+export_decentlab_time_series_worker <- function(domain, key, device, start,
                                                  end, directory, verbose) {
   
   # Get time series for sensor (called a device here)
-  df <- get_decent_lab_time_series(
+  df <- get_decentlab_time_series(
     domain = domain,
     key = key,
     device = device,
@@ -68,7 +68,7 @@ export_decent_lab_time_series_worker <- function(domain, key, device, start,
     
     # Export piece by piece
     purrr::walk(
-      list_df_day, export_decent_lab_time_series_file_writter, directory = directory
+      list_df_day, export_decentlab_time_series_file_writter, directory = directory
     )
     
   }
@@ -78,11 +78,11 @@ export_decent_lab_time_series_worker <- function(domain, key, device, start,
 }
 
 
-export_decent_lab_time_series_file_writter <- function(df, directory) {
+export_decentlab_time_series_file_writter <- function(df, directory) {
   
   # Build a file name
   file_name <- stringr::str_c(
-    format(df$day[1]), "_device_", df$device[1], "_decent_lab_api_data.csv.bz2"
+    format(df$day[1]), "_device_", df$device[1], "_decentlab_api_data.csv.bz2"
   )
   
   # Build a path

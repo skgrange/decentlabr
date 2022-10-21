@@ -18,14 +18,14 @@
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
-#' @seealso \code{\link{get_decent_lab_last_values}}
+#' @seealso \code{\link{get_decentlab_last_values}}
 #' 
 #' @return Tibble. 
 #' 
 #' @examples 
 #' 
 #' # Get a device's observations for a short time period
-#' get_decent_lab_time_series(
+#' get_decentlab_time_series(
 #'   domain = "demo.decentlab.com",
 #'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
 #'   device = 3001,
@@ -34,7 +34,7 @@
 #' )
 #' 
 #' # Get a device's observations for a short time period in wide format
-#' get_decent_lab_time_series(
+#' get_decentlab_time_series(
 #'   domain = "demo.decentlab.com",
 #'   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
 #'   device = 3001,
@@ -44,13 +44,13 @@
 #' )
 #' 
 #' @export
-get_decent_lab_time_series <- function(domain, key, device, start = NA, end = NA, 
-                                       as_wide = FALSE, tz = "UTC", 
-                                       verbose = FALSE) {
+get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA, 
+                                      as_wide = FALSE, tz = "UTC", 
+                                      verbose = FALSE) {
   
   device %>% 
     purrr::map_dfr(
-      ~get_decent_lab_time_series_worker(
+      ~get_decentlab_time_series_worker(
         domain = domain,
         key = key,
         device = .,
@@ -65,8 +65,8 @@ get_decent_lab_time_series <- function(domain, key, device, start = NA, end = NA
 }
 
 
-get_decent_lab_time_series_worker <- function(domain, key, device, start, end, 
-                                              as_wide, tz, verbose) {
+get_decentlab_time_series_worker <- function(domain, key, device, start, end, 
+                                             as_wide, tz, verbose) {
   
   # Message to user
   if (verbose) message(date_message(), "Querying device `", device, "`...")
