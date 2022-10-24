@@ -26,7 +26,7 @@ decentlab_variables_look_up <- function() {
     "hpp",        "calibration_a",                "calibration_a", 
     "hpp",        "calibration_b",                "calibration_b", 
     "picarro",    "co2",                          "co2_rep",           
-    "picarro",    "co2_dry",                      "co2_rep_dry",       
+    "picarro",    "co2_dry",                      "co2_dry_rep",       
     "picarro",    "h2o",                          "h2o",           
     "picarro",    "pressure",                     "pressure",      
     "picarro",    "rh",                           "rh",            
