@@ -69,7 +69,7 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
                                              as_wide, tz, verbose) {
   
   # Message to user
-  if (verbose) message(date_message(), "Querying device `", device, "`...")
+  if (verbose) message(date_message(), "Getting data for device `", device, "`...")
   
   # Parse some of the arguments that are fed to the API
   if (is.na(device[1])) {

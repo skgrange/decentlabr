@@ -49,7 +49,10 @@ decentlab_variables_look_up <- function() {
     "vaisala",    "sensirion_sht21_humidity",     "rh",            
     "vaisala",    "sensirion_sht21_temperature",  "temp",          
     "vaisala",    "calibration_a",                "calibration_a", 
-    "vaisala",    "calibration_b",                "calibration_b"
+    "vaisala",    "calibration_b",                "calibration_b",
+    "dl_atm22",   "metergroup_atmos22_air_temperature",  "air_temp",             
+    "dl_atm22",   "metergroup_atmos22_wind_direction",   "wd",             
+    "dl_atm22",   "metergroup_atmos22_wind_speed",       "ws"
   )
   
 }

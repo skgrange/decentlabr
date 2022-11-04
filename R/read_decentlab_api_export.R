@@ -55,6 +55,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     any(stringr::str_detect(names(df), "senseair_lp8")) ~ "dl_lp8",
     any(stringr::str_detect(names(df), "vaisala_gmp343")) ~ "vaisala",
     any(stringr::str_detect(names(df), "licor_li850")) ~ "licor",
+    any(stringr::str_detect(names(df), "atmos22")) ~ "dl_atm22",
     TRUE ~ NA_character_
   )
   
