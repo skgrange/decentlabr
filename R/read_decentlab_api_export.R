@@ -132,9 +132,11 @@ join_sites_by_date_range <- function(df, df_ranges) {
   )
   
   # Filter ranges table
-  df_ranges <- inner_join(df_ranges, distinct(df, sensor_id), by = "sensor_id")
+  df_ranges <- inner_join(df_ranges, distinct(df, sensor_id), by = "sensor_id") %>% 
+    tibble::rowid_to_column("rowid")
   
-  # Join site by date range
+  # Join site by date range, extra join is for when there are extra variables
+  # in df_ranges
   df_sites <- df %>% 
     distinct(date,
              sensor_id) %>% 
@@ -144,8 +146,12 @@ join_sites_by_date_range <- function(df, df_ranges) {
       by = "sensor_id",
       min = "date_start",
       max = "date_end",
-      add = "site"
-    )
+      add = "rowid"
+    ) %>% 
+    left_join(
+      select(df_ranges, -sensor_id, -date_start, -date_end), by = "rowid"
+    ) %>% 
+    select(-rowid)
   
   # Join to table again
   df <- left_join(df, df_sites, by = c("date", "sensor_id"))
@@ -153,6 +159,7 @@ join_sites_by_date_range <- function(df, df_ranges) {
   return(df)
   
 }
+
 
 join_sensing_element_id_by_date_range <- function(df, df_ranges) {
   
