@@ -9,13 +9,13 @@ To gain access to the API, credentials are needed in the form of a domain and ke
 To install the development version the [`remotes`](https://github.com/r-lib/remotes) package will need to be installed first. Then:
 
 ```
-# Install envirologgerr
+# Install decentlabr
 remotes::install_github("skgrange/decentlabr")
 ```
 
 ## Usage
 
-**decentlabr** has two primary functions: `get_decent_lab_last_values` and `get_decent_lab_time_series`. `get_decent_lab_last_values` returns a table that contains the devices and sensors that are available for a given domain (user). For example, using demo credentials, there are 105 time series (device-sensor pairs) that can be downloaded:
+**decentlabr** has two primary functions: `get_decentlab_last_values` and `get_decentlab_time_series`. `get_decentlab_last_values` returns a table that contains the devices and sensors that are available for a given domain (user). For example, using demo credentials, there are 105 time series (device-sensor pairs) that can be downloaded:
 
 ``` r
 # Load packages
@@ -23,7 +23,7 @@ library(dplyr)
 library(decentlabr)
 
 # Get all device-sensor time series for a domain/user
-get_decent_lab_last_values(
+get_decentlab_last_values(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9"
 )
@@ -49,7 +49,7 @@ To get the observations for a time series, the device must be known. Say a user 
 
 ``` r
 # Get time series for a particular device
-get_decent_lab_last_values(
+get_decentlab_last_values(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9"
 ) %>% 
@@ -76,11 +76,11 @@ get_decent_lab_last_values(
 #> # ℹ Use `print(n = ...)` to see more rows
 ```
 
-After the device is known, this is simply passed to the `get_decent_lab_time_series` function that will get/import/fetch the data that is available for the device. To get data for the device for the first day of 2021, `get_decent_lab_time_series` is used like this: 
+After the device is known, this is simply passed to the `get_decentlab_time_series` function that will get/import/fetch the data that is available for the device. To get data for the device for the first day of 2021, `get_decentlab_time_series` is used like this: 
 
 ``` r
 # Get the time series for a device for a short time period
-get_decent_lab_time_series(
+get_decentlab_time_series(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
   device = "1404",
@@ -105,10 +105,10 @@ get_decent_lab_time_series(
 #> # ℹ Use `print(n = ...)` to see more rows
 ```
 
-Currently, all sensors' data will be returned for each device when using `get_decent_lab_time_series`, but this will likely change in the future. By default, the observations are provided in "long" format, but to reshape these data to wide format, use the `as_wide` argument: 
+Currently, all sensors' data will be returned for each device when using `get_decentlab_time_series`, but this will likely change in the future. By default, the observations are provided in "long" format, but to reshape these data to wide format, use the `as_wide` argument: 
 
 ``` r
-get_decent_lab_time_series(
+get_decentlab_time_series(
   domain = "demo.decentlab.com",
   key = "eyJrIjoiclhMRFFvUXFzQXpKVkZydm52b0VMRVg3M3U2b3VqQUciLCJuIjoiZGF0YS1xdWVyeS1hcGktZGVtby0yIiwiaWQiOjF9",
   device = "1404",
