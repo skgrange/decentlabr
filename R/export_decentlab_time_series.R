@@ -13,6 +13,9 @@
 #' 
 #' @param directory Directory where the files should be exported to. 
 #' 
+#' @param progress_bar An optional argument to accept a 
+#' \code{progressr::progressor} object for a progress bar. 
+#' 
 #' @param verbose Should the functions give messages? 
 #' 
 #' @author Stuart K. Grange
@@ -23,11 +26,12 @@
 #' 
 #' @export
 export_decentlab_time_series <- function(domain, key, device, start, end,
-                                          directory, verbose = FALSE) {
-  
-  # Get data and export daily files into a directory
-  device %>% 
+                                         directory, progress_bar = NULL, 
+                                         verbose = FALSE) {
+
+    # Get data and export daily files into a directory
     purrr::walk(
+      device,
       ~export_decentlab_time_series_worker(
         domain = domain, 
         key = key,
@@ -35,6 +39,7 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
         start = start,
         end = end,
         directory = directory,
+        progress = progress_bar,
         verbose = verbose
       )
     )
@@ -45,7 +50,8 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
 
 
 export_decentlab_time_series_worker <- function(domain, key, device, start,
-                                                 end, directory, verbose) {
+                                                end, directory, progress_bar, 
+                                                verbose) {
   
   # Get time series for sensor (called a device here)
   df <- get_decentlab_time_series(
@@ -66,12 +72,15 @@ export_decentlab_time_series_worker <- function(domain, key, device, start,
       mutate(day = lubridate::floor_date(date, "day")) %>% 
       dplyr::group_split(day)
     
-    # Export piece by piece
+    # Export piece by piece/day by day
     purrr::walk(
       list_df_day, export_decentlab_time_series_file_writter, directory = directory
     )
     
   }
+  
+  # Update progress bar
+  if (!is.null(progress_bar)) progress_bar()
   
   return(invisible(df))
   
