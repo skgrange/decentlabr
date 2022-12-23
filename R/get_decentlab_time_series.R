@@ -121,12 +121,20 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   df <- df %>% 
     as_tibble() %>% 
     rename(date = time) %>% 
-    tidyr::separate(series, into = c("device", "sensor"), sep = "\\.") %>% 
+    tidyr::separate(
+      series, into = c("device", "sensor"), sep = "\\.", extra = "merge"
+    ) %>% 
     mutate(date_unix = as.numeric(date),
            device = as.integer(device),
            sensor = str_to_underscore(sensor)) %>% 
     relocate(date,
              date_unix)
+  
+  # df %>% 
+  #   tidyr::separate(
+  #     series, into = c("device", "sensor", "channel"),  sep = "\\.", 
+  #     extra = "merge"
+  #   )
   
   # Reshape to wide table if needed
   if (as_wide) {
