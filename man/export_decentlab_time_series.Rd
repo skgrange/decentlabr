@@ -12,7 +12,7 @@ export_decentlab_time_series(
   start,
   end,
   directory,
-  progress_bar = NULL,
+  progress = FALSE,
   verbose = FALSE
 )
 }
@@ -29,8 +29,7 @@ export_decentlab_time_series(
 
 \item{directory}{Directory where the files should be exported to.}
 
-\item{progress_bar}{An optional argument to accept a 
-\code{progressr::progressor} object for a progress bar.}
+\item{progress}{Should the function show a progress bar?}
 
 \item{verbose}{Should the functions give messages?}
 }

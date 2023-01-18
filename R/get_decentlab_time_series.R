@@ -109,7 +109,7 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
       sensor = "//", 
       timeFilter = time_filter,
       timezone = tz
-    ) 
+    )
   }, error = function(e) {
     tibble()
   })
@@ -122,19 +122,16 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
     as_tibble() %>% 
     rename(date = time) %>% 
     tidyr::separate(
-      series, into = c("device", "sensor"), sep = "\\.", extra = "merge"
+      series, 
+      into = c("device", "sensor"), 
+      sep = "\\.", 
+      extra = "merge"
     ) %>% 
     mutate(date_unix = as.numeric(date),
            device = as.integer(device),
            sensor = str_to_underscore(sensor)) %>% 
     relocate(date,
              date_unix)
-  
-  # df %>% 
-  #   tidyr::separate(
-  #     series, into = c("device", "sensor", "channel"),  sep = "\\.", 
-  #     extra = "merge"
-  #   )
   
   # Reshape to wide table if needed
   if (as_wide) {
@@ -144,3 +141,53 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   return(df)
   
 }
+
+
+# # Separate the variables format a few things
+# df <- df %>%
+#   as_tibble() %>%
+#   rename(date = time) %>%
+#   tidyr::separate(
+#     series,
+#     into = c("device", "sensor", "channel"),
+#     sep = "\\.",
+#     extra = "merge",
+#     fill = "right"
+#   ) %>%
+#   mutate(date_unix = as.numeric(date),
+#          device = as.integer(device),
+#          sensor = str_to_underscore(sensor)) %>%
+#   relocate(date,
+#            date_unix) %>%
+#   drop_na_columns()
+# 
+# # Does the table have a channel variable
+# has_channel <- "channel" %in% names(df)
+# 
+# # Make channel variable an integer if it exists
+# if (has_channel) {
+#   df <- df %>% 
+#     mutate(channel = stringr::str_remove(channel, "^ch"),
+#            channel = as.integer(channel))
+# }
+# 
+# # Reshape to wide table if desired, but only can be done when no channel
+# # variable is present
+# if (as_wide) {
+#   if (!has_channel) {
+#     # Do the reshaping
+#     df <- tidyr::pivot_wider(df, names_from = sensor)
+#   } else {
+#    warning(
+#      "The observations have a `channel` variable so the `as_wide` argument cannot be honored."
+#     )
+#   }
+# }
+
+
+# # Pulled from threadr
+# drop_na_columns <- function(df) {
+#   index <- colSums(is.na(df)) < nrow(df)
+#   df <- df[, index, drop = FALSE]
+#   return(df)
+# }

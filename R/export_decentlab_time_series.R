@@ -13,8 +13,7 @@
 #' 
 #' @param directory Directory where the files should be exported to. 
 #' 
-#' @param progress_bar An optional argument to accept a 
-#' \code{progressr::progressor} object for a progress bar. 
+#' @param progress Should the function show a progress bar? 
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
@@ -26,7 +25,7 @@
 #' 
 #' @export
 export_decentlab_time_series <- function(domain, key, device, start, end,
-                                         directory, progress_bar = NULL, 
+                                         directory, progress = FALSE, 
                                          verbose = FALSE) {
 
     # Get data and export daily files into a directory
@@ -39,9 +38,9 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
         start = start,
         end = end,
         directory = directory,
-        progress = progress_bar,
         verbose = verbose
-      )
+      ),
+      .progress = progress
     )
   
   return(invisible(device))
@@ -50,8 +49,7 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
 
 
 export_decentlab_time_series_worker <- function(domain, key, device, start,
-                                                end, directory, progress_bar, 
-                                                verbose) {
+                                                end, directory, verbose) {
   
   # Get time series for sensor (called a device here)
   df <- get_decentlab_time_series(
@@ -78,9 +76,6 @@ export_decentlab_time_series_worker <- function(domain, key, device, start,
     )
     
   }
-  
-  # Update progress bar
-  if (!is.null(progress_bar)) progress_bar()
   
   return(invisible(df))
   
