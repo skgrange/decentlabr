@@ -117,23 +117,48 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   # If no data, return here
   if (nrow(df) == 0L) return(tibble())
   
-  # When data are available
-  df <- df %>% 
-    as_tibble() %>% 
-    rename(date = time) %>% 
+  # # When data are available
+  # df <- df %>% 
+  #   as_tibble() %>% 
+  #   rename(date = time) %>% 
+  #   tidyr::separate(
+  #     series, 
+  #     into = c("device", "sensor"), 
+  #     sep = "\\.", 
+  #     extra = "merge"
+  #   ) %>% 
+  #   mutate(date_unix = as.numeric(date),
+  #          device = as.integer(device),
+  #          sensor = str_to_underscore(sensor)) %>% 
+  #   relocate(date,
+  #            date_unix)
+  
+  # Separate the variables format a few things
+  df <- df %>%
+    as_tibble() %>%
+    rename(date = time) %>%
     tidyr::separate(
-      series, 
-      into = c("device", "sensor"), 
-      sep = "\\.", 
-      extra = "merge"
-    ) %>% 
+      series,
+      into = c("device", "sensor", "channel"),
+      sep = "\\.",
+      extra = "merge",
+      fill = "right"
+    ) %>%
     mutate(date_unix = as.numeric(date),
            device = as.integer(device),
-           sensor = str_to_underscore(sensor)) %>% 
+           sensor = str_to_underscore(sensor)) %>%
     relocate(date,
-             date_unix)
+             date_unix) %>%
+    drop_na_columns()
   
-  # Reshape to wide table if needed
+  # Make channel variable an integer if it exists
+  if ("channel" %in% names(df)) {
+    df <- df %>%
+      mutate(channel = stringr::str_remove(channel, "^ch"),
+             channel = as.integer(channel))
+  }
+  
+  # Reshape to wide table if desired
   if (as_wide) {
     df <- tidyr::pivot_wider(df, names_from = sensor)
   }
@@ -143,51 +168,9 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
 }
 
 
-# # Separate the variables format a few things
-# df <- df %>%
-#   as_tibble() %>%
-#   rename(date = time) %>%
-#   tidyr::separate(
-#     series,
-#     into = c("device", "sensor", "channel"),
-#     sep = "\\.",
-#     extra = "merge",
-#     fill = "right"
-#   ) %>%
-#   mutate(date_unix = as.numeric(date),
-#          device = as.integer(device),
-#          sensor = str_to_underscore(sensor)) %>%
-#   relocate(date,
-#            date_unix) %>%
-#   drop_na_columns()
-# 
-# # Does the table have a channel variable
-# has_channel <- "channel" %in% names(df)
-# 
-# # Make channel variable an integer if it exists
-# if (has_channel) {
-#   df <- df %>% 
-#     mutate(channel = stringr::str_remove(channel, "^ch"),
-#            channel = as.integer(channel))
-# }
-# 
-# # Reshape to wide table if desired, but only can be done when no channel
-# # variable is present
-# if (as_wide) {
-#   if (!has_channel) {
-#     # Do the reshaping
-#     df <- tidyr::pivot_wider(df, names_from = sensor)
-#   } else {
-#    warning(
-#      "The observations have a `channel` variable so the `as_wide` argument cannot be honored."
-#     )
-#   }
-# }
-
-
-# # Pulled from threadr
-# drop_na_columns <- function(df) {
-#   index <- colSums(is.na(df)) < nrow(df)
-#   df <- df[, index, drop = FALSE]
-#   return(df)
-# }
+# Pulled from threadr
+drop_na_columns <- function(df) {
+  index <- colSums(is.na(df)) < nrow(df)
+  df <- df[, index, drop = FALSE]
+  return(df)
+}
