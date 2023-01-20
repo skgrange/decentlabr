@@ -65,7 +65,7 @@ decentlab_variables_look_up <- function() {
     "senseair_k96", "senseair_k96_mpl_ir_signal",              "ir_mpl",        
     "senseair_k96", "senseair_k96_mpl_signal",                 "mpl",           
     "senseair_k96", "senseair_k96_pressure_filtered",          "pressure",      
-    "senseair_k96", "senseair_k96_sensor_id",                  "",              
+    "senseair_k96", "senseair_k96_sensor_id",                  "sensing_element_id",              
     "senseair_k96", "senseair_k96_status",                     "status",        
     "senseair_k96", "senseair_k96_temperature_ntc0",           "temp",          
     "senseair_k96", "senseair_k96_temperature_ntc1",           ""
