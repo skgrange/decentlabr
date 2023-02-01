@@ -18,6 +18,8 @@
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
+#' @param progress Should a progress bar displayed? 
+#' 
 #' @seealso \code{\link{get_decentlab_last_values}}
 #' 
 #' @return Tibble. 
@@ -46,7 +48,7 @@
 #' @export
 get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA, 
                                       as_wide = FALSE, tz = "UTC", 
-                                      verbose = FALSE) {
+                                      verbose = FALSE, progress = FALSE) {
   
   device %>% 
     purrr::map_dfr(
@@ -59,7 +61,8 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
         as_wide = as_wide,
         tz = tz,
         verbose = verbose
-      )
+      ),
+      .progress = progress
     )
   
 }
@@ -117,33 +120,16 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   # If no data, return here
   if (nrow(df) == 0L) return(tibble())
   
-  # # When data are available
-  # df <- df %>% 
-  #   as_tibble() %>% 
-  #   rename(date = time) %>% 
-  #   tidyr::separate(
-  #     series, 
-  #     into = c("device", "sensor"), 
-  #     sep = "\\.", 
-  #     extra = "merge"
-  #   ) %>% 
-  #   mutate(date_unix = as.numeric(date),
-  #          device = as.integer(device),
-  #          sensor = str_to_underscore(sensor)) %>% 
-  #   relocate(date,
-  #            date_unix)
-  
   # Separate the variables format a few things
-  df <- df %>%
-    as_tibble() %>%
+  df <- df %>% 
+    as_tibble() %>% 
     rename(date = time) %>%
-    tidyr::separate(
+    tidyr::separate_wider_delim(
       series,
-      into = c("device", "sensor", "channel"),
-      sep = "\\.",
-      extra = "merge",
-      fill = "right"
-    ) %>%
+      delim = ".",
+      names = c("device", "sensor", "channel"),
+      too_few = "align_start"
+    ) %>% 
     mutate(date_unix = as.numeric(date),
            device = as.integer(device),
            sensor = str_to_underscore(sensor)) %>%

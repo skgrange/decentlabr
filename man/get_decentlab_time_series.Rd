@@ -12,7 +12,8 @@ get_decentlab_time_series(
   end = NA,
   as_wide = FALSE,
   tz = "UTC",
-  verbose = FALSE
+  verbose = FALSE,
+  progress = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ get_decentlab_time_series(
 \item{tz}{Time-zone for the time series to be returned in.}
 
 \item{verbose}{Should the functions give messages?}
+
+\item{progress}{Should a progress bar displayed?}
 }
 \value{
 Tibble.
