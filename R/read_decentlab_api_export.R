@@ -132,31 +132,18 @@ join_sites_by_date_range <- function(df, df_ranges) {
     lubridate::is.POSIXt(df_ranges$date_end)
   )
   
-  # Filter ranges table
-  df_ranges <- inner_join(df_ranges, distinct(df, sensor_id), by = "sensor_id") %>% 
-    tibble::rowid_to_column("rowid")
-  
-  # Join site by date range, extra join is for when there are extra variables
-  # in df_ranges
-  df_sites <- df %>% 
-    distinct(date,
-             sensor_id) %>% 
-    add_by_id_and_range(
-      test = "date",
-      df_map = df_ranges,
-      by = "sensor_id",
-      min = "date_start",
-      max = "date_end",
-      add = "rowid"
-    ) %>% 
+  # Do the join, a conditional or an inequality join
+  df <- df %>% 
     left_join(
-      select(df_ranges, -sensor_id, -date_start, -date_end), by = "rowid"
+      df_ranges,
+      by = join_by(
+        sensor_id == sensor_id,
+        between(date, date_start, date_end)
+      )
     ) %>% 
-    select(-rowid)
-  
-  # Join to table again
-  df <- left_join(df, df_sites, by = c("date", "sensor_id"))
-  
+    select(-date_start,
+           -date_end)
+
   return(df)
   
 }
@@ -182,23 +169,24 @@ join_sensing_element_id_by_date_range <- function(df, df_ranges) {
     lubridate::is.POSIXt(df_ranges$date_end)
   )
   
-  # Filter ranges table
-  df_ranges <- inner_join(df_ranges, distinct(df, sensor_id), by = "sensor_id")
+  # Select variables to use in join, no variable used here
+  df_ranges <- df_ranges %>% 
+    select(sensor_id,
+           sensing_element_id,
+           date_start,
+           date_end)
   
-  df_sensing_elements <- df %>% 
-    distinct(date,
-             sensor_id) %>% 
-    add_by_id_and_range(
-      test = "date",
-      df_map = df_ranges,
-      by = "sensor_id",
-      min = "date_start",
-      max = "date_end",
-      add = "sensing_element_id"
-    )
-  
-  # Join to table again
-  df <- left_join(df, df_sensing_elements, by = c("date", "sensor_id"))
+  # Do the join, a conditional or an inequality join
+  df <- df %>% 
+    left_join(
+      df_ranges,
+      by = join_by(
+        sensor_id == sensor_id,
+        between(date, date_start, date_end)
+      )
+    ) %>% 
+    select(-date_start,
+           -date_end)
   
   return(df)
   
