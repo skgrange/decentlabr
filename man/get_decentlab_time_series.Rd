@@ -33,7 +33,7 @@ get_decentlab_time_series(
 
 \item{verbose}{Should the functions give messages?}
 
-\item{progress}{Should a progress bar displayed?}
+\item{progress}{Should a progress bar be displayed?}
 }
 \value{
 Tibble.

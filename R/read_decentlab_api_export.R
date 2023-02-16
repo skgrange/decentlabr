@@ -17,6 +17,8 @@
 #' @param date_round Should the dates be rounded to seconds? Sometimes, the API
 #' returns data with sub-second accuracy. 
 #' 
+#' @param progress Should a progress bar be displayed? 
+#' 
 #' @seealso \code{\link{export_decentlab_time_series}}
 #' 
 #' @return Tibble. 
@@ -25,9 +27,9 @@
 read_decentlab_api_export <- function(file, df_site_ranges = NA, 
                                       df_sensing_elements_ranges = NA,
                                       variable_switch = FALSE,
-                                      date_round = FALSE) {
+                                      date_round = FALSE, progress = FALSE) {
   
-  purrr::map_dfr(
+  purrr::map(
     file,
     ~read_decentlab_api_export_worker(
       file = .,
@@ -35,8 +37,10 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
       df_sensing_elements_ranges = df_sensing_elements_ranges,
       variable_switch = variable_switch,
       date_round = date_round
-    )
-  )
+    ),
+    .progress = progress
+  ) %>% 
+    purrr::list_rbind()
   
 }
 

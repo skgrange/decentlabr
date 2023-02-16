@@ -29,7 +29,7 @@ export_decentlab_time_series(
 
 \item{directory}{Directory where the files should be exported to.}
 
-\item{progress}{Should the function show a progress bar?}
+\item{progress}{Should a progress bar be displayed?}
 
 \item{verbose}{Should the functions give messages?}
 }

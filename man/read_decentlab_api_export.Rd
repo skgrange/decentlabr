@@ -10,7 +10,8 @@ read_decentlab_api_export(
   df_site_ranges = NA,
   df_sensing_elements_ranges = NA,
   variable_switch = FALSE,
-  date_round = FALSE
+  date_round = FALSE,
+  progress = FALSE
 )
 }
 \arguments{
@@ -27,6 +28,8 @@ filtered to those contained in \code{\link{decentlab_variables_look_up}}.}
 
 \item{date_round}{Should the dates be rounded to seconds? Sometimes, the API
 returns data with sub-second accuracy.}
+
+\item{progress}{Should a progress bar be displayed?}
 }
 \value{
 Tibble.

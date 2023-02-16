@@ -18,7 +18,7 @@
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
-#' @param progress Should a progress bar displayed? 
+#' @param progress Should a progress bar be displayed? 
 #' 
 #' @seealso \code{\link{get_decentlab_last_values}}
 #' 
@@ -51,7 +51,7 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
                                       verbose = FALSE, progress = FALSE) {
   
   device %>% 
-    purrr::map_dfr(
+    purrr::map(
       ~get_decentlab_time_series_worker(
         domain = domain,
         key = key,
@@ -63,7 +63,8 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
         verbose = verbose
       ),
       .progress = progress
-    )
+    ) %>% 
+    purrr::list_rbind()
   
 }
 
@@ -101,7 +102,7 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
     as.character()
   
   # Query API
-  # TODO: Handle errors better
+  # TODO: Handle errors in a better and more robust manner
   df <- tryCatch({
     query(
       domain = domain,

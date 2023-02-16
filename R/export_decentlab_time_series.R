@@ -13,7 +13,7 @@
 #' 
 #' @param directory Directory where the files should be exported to. 
 #' 
-#' @param progress Should the function show a progress bar? 
+#' @param progress Should a progress bar be displayed? 
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
