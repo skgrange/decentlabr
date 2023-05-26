@@ -23,7 +23,7 @@ get_decentlab_last_values <- function(domain, key) {
     as_tibble() %>% 
     rename(date = time) %>% 
     mutate(
-      across(c("channel", "location", "unit"), ~if_else(. == "", NA_character_, .)),
+      across(c(channel, location, unit), ~if_else(. == "", NA_character_, .)),
       device =  stringr::str_split_fixed(uqk, "\\.", n = 2)[, 1]
     ) %>% 
     relocate(date,

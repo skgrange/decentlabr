@@ -12,14 +12,15 @@
 #' element information. 
 #' 
 #' @param variable_switch Should the variables be switched to "clean" names and
-#' filtered to those contained in \code{\link{decentlab_variables_look_up}}.
+#' filtered to those contained in \code{\link{read_decentlab_variables}}.
 #' 
 #' @param date_round Should the dates be rounded to seconds? Sometimes, the API
 #' returns data with sub-second accuracy. 
 #' 
 #' @param progress Should a progress bar be displayed? 
 #' 
-#' @seealso \code{\link{export_decentlab_time_series}}
+#' @seealso \code{\link{export_decentlab_time_series}}, 
+#' \code{\link{read_decentlab_variables}}.
 #' 
 #' @return Tibble. 
 #' 
@@ -55,10 +56,10 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   # Try to determine sensor type from names, this will not work for sensors that
   # have not been hard coded here
   sensor_type <- dplyr::case_when(
-    any(stringr::str_detect(names(df), "hpp")) ~ "hpp",
+    any(stringr::str_detect(names(df), "hpp")) ~ "senseair_hpp",
     any(stringr::str_detect(names(df), "senseair_lp8")) ~ "dl_lp8",
-    any(stringr::str_detect(names(df), "vaisala_gmp343")) ~ "vaisala",
-    any(stringr::str_detect(names(df), "licor_li850")) ~ "licor",
+    any(stringr::str_detect(names(df), "vaisala_gmp343")) ~ "vaisala_gmp343",
+    any(stringr::str_detect(names(df), "licor_li850")) ~ "licor_li850",
     any(stringr::str_detect(names(df), "atmos22")) ~ "dl_atm22",
     any(stringr::str_detect(names(df), "senseair_k96")) ~ "senseair_k96",
     TRUE ~ NA_character_
@@ -87,7 +88,9 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   # Use variable names to switch name and filter table
   if (variable_switch) {
     df <- df %>% 
-      inner_join(decentlab_variables_look_up(), by = c("sensor_type", "variable")) %>% 
+      inner_join(
+        read_decentlab_variables(), by = join_by(sensor_type, variable)
+      ) %>% 
       select(-variable) %>% 
       rename(variable = variable_clean) %>% 
       relocate(variable,
@@ -164,7 +167,8 @@ join_sensing_element_id_by_date_range <- function(df, df_ranges) {
   # Check ranges input
   # Check if the needed variables exist
   stopifnot(
-    c("sensor_id", "sensing_element_id", "date_start", "date_end") %in% names(df_ranges)
+    c("sensor_id", "sensing_element_id", "date_start", "date_end") %in% 
+      names(df_ranges)
   )
   
   # Check if the data types are correct

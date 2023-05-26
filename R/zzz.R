@@ -8,7 +8,7 @@ if (getRversion() >= "2.15.1") {
   variables <- c(
     ".", "time", "series", "date_unix", "uqk", "device", "sensor", "unit", 
     "value", "day", "sensor_id", "site", "variable", "sensing_element_id",
-    "variable_clean", "date_start", "date_end", "rowid", "channel"
+    "variable_clean", "date_start", "date_end", "rowid", "channel", "location"
   )
   
   # Squash the notes

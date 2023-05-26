@@ -24,7 +24,7 @@ read_decentlab_api_export(
 element information.}
 
 \item{variable_switch}{Should the variables be switched to "clean" names and
-filtered to those contained in \code{\link{decentlab_variables_look_up}}.}
+filtered to those contained in \code{\link{read_decentlab_variables}}.}
 
 \item{date_round}{Should the dates be rounded to seconds? Sometimes, the API
 returns data with sub-second accuracy.}
@@ -39,7 +39,8 @@ Function to read exported Decentlab API files with options to add site and
 sensing element IDs.
 }
 \seealso{
-\code{\link{export_decentlab_time_series}}
+\code{\link{export_decentlab_time_series}}, 
+\code{\link{read_decentlab_variables}}.
 }
 \author{
 Stuart K. Grange.
