@@ -13,13 +13,13 @@ read_decentlab_variables <- function() {
   
   tibble::tribble(
     ~sensor_type,     ~variable,                                 ~variable_clean,     
-    "dl_lp8",         "sensirion_sht21_temperature",             "temp",              
-    "dl_lp8",         "sensirion_sht21_humidity",                "rh",                
-    "dl_lp8",         "senseair_lp8_vcap2",                      "vcap2",             
-    "dl_lp8",         "senseair_lp8_vcap1",                      "vcap1",             
-    "dl_lp8",         "senseair_lp8_co2",                        "co2_rep",           
-    "dl_lp8",         "senseair_lp8_ir",                         "ir",                
-    "dl_lp8",         "senseair_lp8_status",                     "status",            
+    "dl_lp8",     "senseair_lp8_co2",            "co2_rep",            
+    "dl_lp8",     "senseair_lp8_ir",             "ir",                 
+    "dl_lp8",     "senseair_lp8_status",         "status",             
+    "dl_lp8",     "senseair_lp8_vcap1",          "voltage_capacitor_1",
+    "dl_lp8",     "senseair_lp8_vcap2",          "voltage_capacitor_2",
+    "dl_lp8",     "sensirion_sht21_humidity",    "sensor_rh",          
+    "dl_lp8",     "sensirion_sht21_temperature", "sensor_temp",      
     "senseair_hpp",   "senseair_hpp_co2_filtered",               "co2_rep",           
     "senseair_hpp",   "senseair_hpp_ir_signal",                  "ir",                
     "senseair_hpp",   "senseair_hpp_lpl_signal",                 "lpl",               
@@ -63,8 +63,6 @@ read_decentlab_variables <- function() {
     "senseair_k96",   "senseair_k96_sensor_id",                  "sensing_element_id",
     "senseair_k96",   "senseair_k96_status",                     "status",            
     "senseair_k96",   "senseair_k96_temperature_ntc0",           "temp"
-  ) %>% 
-    filter(!is.na(variable_clean), 
-           variable_clean != "")
+  )
   
 }

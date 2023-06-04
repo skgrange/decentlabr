@@ -1,6 +1,6 @@
 # **decentlabr**
 
-**decentlabr** is an R interface to the [Decentlab](https://www.decentlab.com) API. **decentlabr** uses a collection of [provided functions](https://docs.decentlab.com/data-access-guide/v5/index.html) and formats the returns for rapid analysis and use. 
+**decentlabr** is an R interface to the [Decentlab](https://www.decentlab.com) API. **decentlabr** uses a collection of [provided functions](https://docs.decentlab.com/data-access-guide/v5/index.html) and formats the returns for rapid data analysis and use. 
 
 To gain access to the API, credentials are needed in the form of a domain and key.
 
@@ -45,7 +45,7 @@ get_decentlab_last_values(
 #> # ℹ Use `print(n = ...)` to see more rows
 ```
 
-To get the observations for a time series, the device must be known. Say a user was interested in CO~2~ concentrations, a low-cost sensor with the device number of 1404 can be accessed with these demo credentials. 
+To get the observations for a time series, the device must be known. Say a user was interested in CO<sub>2</sub> concentrations, a low-cost sensor with the device number of 1404 can be accessed with the demo credentials like so: 
 
 ``` r
 # Get time series for a particular device
