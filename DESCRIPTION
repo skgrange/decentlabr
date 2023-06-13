@@ -27,6 +27,7 @@ Imports:
     glue,
     rlang,
     fs,
-    readr
+    readr,
+    cli
 Encoding: UTF-8
 RoxygenNote: 7.2.3

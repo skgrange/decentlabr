@@ -17,6 +17,8 @@
 #' @param date_round Should the dates be rounded to seconds? Sometimes, the API
 #' returns data with sub-second accuracy. 
 #' 
+#' @param warn Should the function raise warnings? 
+#' 
 #' @param progress Should a progress bar be displayed? 
 #' 
 #' @seealso \code{\link{export_decentlab_time_series}}, 
@@ -28,7 +30,8 @@
 read_decentlab_api_export <- function(file, df_site_ranges = NA, 
                                       df_sensing_elements_ranges = NA,
                                       variable_switch = FALSE,
-                                      date_round = FALSE, progress = FALSE) {
+                                      date_round = FALSE, warn = TRUE, 
+                                      progress = FALSE) {
   
   purrr::map(
     file,
@@ -37,7 +40,8 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
       df_site_ranges = df_site_ranges,
       df_sensing_elements_ranges = df_sensing_elements_ranges,
       variable_switch = variable_switch,
-      date_round = date_round
+      date_round = date_round,
+      warn = warn
     ),
     .progress = progress
   ) %>% 
@@ -48,7 +52,8 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
 
 read_decentlab_api_export_worker <- function(file, df_site_ranges, 
                                              df_sensing_elements_ranges,
-                                             variable_switch, date_round) {
+                                             variable_switch, date_round,
+                                             warn) {
   
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
@@ -65,6 +70,14 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     TRUE ~ NA_character_
   )
   
+  # Long data for k96 sensors
+  if (is.na(sensor_type) && any(stringr::str_detect(df$sensor, "k96"))) {
+    sensor_type <- "senseair_k96"
+    is_long <- TRUE
+  } else {
+    is_long <- FALSE
+  }
+  
   # Clean table slightly
   df <- df %>% 
     rename(sensor_id = device) %>% 
@@ -80,10 +93,59 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     df <- mutate(df, date = lubridate::round_date(date, "second"))
   }
   
-  # Make table longer
-  df <- tidyr::pivot_longer(
-    df, -c(date, sensor_id, sensor_type), names_to = "variable"
-  )
+  # Make table longer, or at least rename variable to variable
+  if (!is_long) {
+    df <- tidyr::pivot_longer(
+      df, -c(date, sensor_id, sensor_type), names_to = "variable"
+    )
+  } else {
+    df <- rename(df, variable = sensor)
+  }
+
+  # The k96 sensors have sensors within sensors
+  if (sensor_type == "senseair_k96" & is_long) {
+
+    # Get the sensing elements within the sensor packages, usually three
+    df_sensing_elements <- df %>%
+      filter(variable == "senseair_k96_sensor_id") %>%
+      distinct(sensor_id,
+               channel,
+               value) %>%
+      rename(sensing_element_id = value) %>% 
+      mutate(sensing_element_id = as.integer(sensing_element_id))
+    
+    # Replicate `nrow(df_sensing_elements)` times the common variables shared 
+    # among all sensing elements
+    df_common <- df %>% 
+      filter(is.na(channel)) %>%
+      select(-channel) %>%
+      left_join(
+        df_sensing_elements, by = join_by(sensor_id), relationship = "many-to-many"
+      )
+    
+    # df_common %>% 
+    #   count(sensor_id,
+    #         channel,
+    #         sensing_element_id,
+    #         variable)
+    
+    # Not common variables require sensing_element_id
+    df_not_common <- df %>% 
+      filter(!is.na(channel)) %>% 
+      left_join(df_sensing_elements, by = join_by(sensor_id, channel))
+    
+    # df_not_common %>% 
+    #   count(sensor_id,
+    #         channel,
+    #         sensing_element_id,
+    #         variable)
+    
+    # Bind again and drop channel
+    df <- df_common %>% 
+      bind_rows(df_not_common) %>% 
+      select(-channel)
+    
+  }
   
   # Use variable names to switch name and filter table
   if (variable_switch) {
@@ -101,7 +163,13 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   df <- join_sites_by_date_range(df, df_site_ranges)
   
   # Join sensing element if a table was passed to function
-  df <- join_sensing_element_id_by_date_range(df, df_sensing_elements_ranges)
+  if (sensor_type != "senseair_k96") {
+    df <- join_sensing_element_id_by_date_range(df, df_sensing_elements_ranges)
+  } else {
+    if (warn) {
+      cli::cli_alert_warning("Sensing element input has been ignored...")
+    }
+  }
   
   # Final arranging
   df <- df %>% 

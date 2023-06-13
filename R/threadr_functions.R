@@ -23,6 +23,9 @@ str_date_formatted <- function(date = NA, time_zone = TRUE,
 }
 
 
+cli_date <- function() stringr::str_c(str_date_formatted(), ":")
+
+
 str_to_underscore <- function(x) {
   
   x <- gsub("([A-Za-z])([A-Z])([a-z])", "\\1_\\2\\3", x)

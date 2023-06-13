@@ -73,7 +73,9 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
                                              as_wide, tz, verbose) {
   
   # Message to user
-  if (verbose) message(date_message(), "Getting data for device `", device, "`...")
+  if (verbose) {
+    cli::cli_alert_info("{cli_date()} Getting data for device `{device}`...")
+  }
   
   # Parse some of the arguments that are fed to the API
   if (is.na(device[1])) {
@@ -138,16 +140,23 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
              date_unix) %>%
     drop_na_columns()
   
+  # Does the table have the extra channel variable after separation?
+  has_channel <- "channel" %in% names(df)
+  
   # Make channel variable an integer if it exists
-  if ("channel" %in% names(df)) {
+  if (has_channel) {
     df <- df %>%
       mutate(channel = stringr::str_remove(channel, "^ch"),
              channel = as.integer(channel))
   }
   
   # Reshape to wide table if desired
-  if (as_wide) {
+  if (as_wide & !has_channel) {
     df <- tidyr::pivot_wider(df, names_from = sensor)
+  } else if (as_wide & has_channel) {
+    cli::cli_alert_warning(
+      "Device's data has a `channel` variable, `as_wide` argument has been ignored."
+    )
   }
   
   return(df)

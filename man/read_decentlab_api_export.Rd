@@ -11,6 +11,7 @@ read_decentlab_api_export(
   df_sensing_elements_ranges = NA,
   variable_switch = FALSE,
   date_round = FALSE,
+  warn = TRUE,
   progress = FALSE
 )
 }
@@ -28,6 +29,8 @@ filtered to those contained in \code{\link{read_decentlab_variables}}.}
 
 \item{date_round}{Should the dates be rounded to seconds? Sometimes, the API
 returns data with sub-second accuracy.}
+
+\item{warn}{Should the function raise warnings?}
 
 \item{progress}{Should a progress bar be displayed?}
 }
