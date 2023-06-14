@@ -11,6 +11,7 @@ export_decentlab_time_series(
   device,
   start,
   end,
+  as_wide = TRUE,
   directory,
   warn = TRUE,
   verbose = FALSE,
@@ -26,7 +27,12 @@ export_decentlab_time_series(
 
 \item{start}{Start date to get time series for.}
 
-\item{end}{End date to get time series for}
+\item{end}{End date to get time series for.}
+
+\item{as_wide}{Should the return be in "wide" format? The \code{as_wide} 
+argument will not be honoured if the device's data has a \code{channel} 
+variable because the wide format does not work well when this additional 
+identifier is present.}
 
 \item{directory}{Directory/path where the files should be exported to.}
 

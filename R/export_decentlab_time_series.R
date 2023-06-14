@@ -9,7 +9,12 @@
 #' 
 #' @param start Start date to get time series for. 
 #' 
-#' @param end End date to get time series for
+#' @param end End date to get time series for. 
+#' 
+#' @param as_wide Should the return be in "wide" format? The \code{as_wide} 
+#' argument will not be honoured if the device's data has a \code{channel} 
+#' variable because the wide format does not work well when this additional 
+#' identifier is present. 
 #' 
 #' @param directory Directory/path where the files should be exported to. 
 #' 
@@ -26,25 +31,32 @@
 #' @return Invisible \code{domain}.
 #' 
 #' @export
-export_decentlab_time_series <- function(domain, key, device, start, end,
-                                         directory, warn = TRUE, verbose = FALSE,
+export_decentlab_time_series <- function(domain, key, device, start, end, 
+                                         as_wide = TRUE , directory, 
+                                         warn = TRUE, verbose = FALSE,
                                          progress = FALSE) {
-
-    # Get data and export daily files into a directory
-    purrr::walk(
-      device,
-      ~export_decentlab_time_series_worker(
-        domain = domain, 
-        key = key,
-        device = .,
-        start = start,
-        end = end,
-        directory = directory,
-        warn = warn,
-        verbose = verbose
-      ),
-      .progress = progress
-    )
+  
+  # Create the directory if it does not exist
+  if (!fs::dir_exists(directory)) {
+    fs::dir_create(directory)
+  }
+  
+  # Get data and export daily files into a directory
+  purrr::walk(
+    device,
+    ~export_decentlab_time_series_worker(
+      domain = domain, 
+      key = key,
+      device = .,
+      start = start,
+      end = end,
+      as_wide = as_wide,
+      directory = directory,
+      warn = warn,
+      verbose = verbose
+    ),
+    .progress = progress
+  )
   
   return(invisible(device))
   
@@ -52,7 +64,8 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
 
 
 export_decentlab_time_series_worker <- function(domain, key, device, start,
-                                                end, directory, warn, verbose) {
+                                                end, as_wide, directory, warn, 
+                                                verbose) {
   
   # Get time series for sensor (called a device here)
   df <- get_decentlab_time_series(
@@ -61,7 +74,7 @@ export_decentlab_time_series_worker <- function(domain, key, device, start,
     device = device,
     start = start,
     end = end,
-    as_wide = TRUE,
+    as_wide = as_wide,
     tz = "UTC",
     warn = warn,
     verbose = verbose

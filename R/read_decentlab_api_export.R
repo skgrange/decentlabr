@@ -112,7 +112,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
                channel,
                value) %>%
       rename(sensing_element_id = value) %>% 
-      mutate(sensing_element_id = as.integer(sensing_element_id))
+      mutate(sensing_element_id = as.character(sensing_element_id))
     
     # Replicate `nrow(df_sensing_elements)` times the common variables shared 
     # among all sensing elements
@@ -123,22 +123,10 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
         df_sensing_elements, by = join_by(sensor_id), relationship = "many-to-many"
       )
     
-    # df_common %>% 
-    #   count(sensor_id,
-    #         channel,
-    #         sensing_element_id,
-    #         variable)
-    
     # Not common variables require sensing_element_id
     df_not_common <- df %>% 
       filter(!is.na(channel)) %>% 
       left_join(df_sensing_elements, by = join_by(sensor_id, channel))
-    
-    # df_not_common %>% 
-    #   count(sensor_id,
-    #         channel,
-    #         sensing_element_id,
-    #         variable)
     
     # Bind again and drop channel
     df <- df_common %>% 

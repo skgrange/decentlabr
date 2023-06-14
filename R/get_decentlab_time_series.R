@@ -12,10 +12,10 @@
 #' 
 #' @param end End date to get time series for
 #' 
-#' @param as_wide Should the return be in "wide" format? The `as_wide` argument
-#' will not be honored if the device's data has a \code{channel} variable 
-#' because the wide format does not work well when this additional identifier is 
-#' present. 
+#' @param as_wide Should the return be in "wide" format? The \code{as_wide} 
+#' argument will not be honoured if the device's data has a \code{channel} 
+#' variable because the wide format does not work well when this additional 
+#' identifier is present.
 #' 
 #' @param tz Time zone for the time series to be returned in. 
 #' 
@@ -111,7 +111,7 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
     as.character()
   
   # Query API
-  # TODO: Handle errors in a better and more robust manner
+  # TODO: Handle errors in a more robust manner
   df <- tryCatch({
     query(
       domain = domain,
