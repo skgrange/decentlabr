@@ -12,6 +12,7 @@ get_decentlab_time_series(
   end = NA,
   as_wide = FALSE,
   tz = "UTC",
+  warn = TRUE,
   verbose = FALSE,
   progress = FALSE
 )
@@ -27,9 +28,14 @@ get_decentlab_time_series(
 
 \item{end}{End date to get time series for}
 
-\item{as_wide}{Should the return be in "wide" format?}
+\item{as_wide}{Should the return be in "wide" format? The `as_wide` argument
+will not be honored if the device's data has a \code{channel} variable 
+because the wide format does not work well when this additional identifier is 
+present.}
 
-\item{tz}{Time-zone for the time series to be returned in.}
+\item{tz}{Time zone for the time series to be returned in.}
+
+\item{warn}{Should the function raise warnings?}
 
 \item{verbose}{Should the functions give messages?}
 

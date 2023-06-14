@@ -11,11 +11,13 @@
 #' 
 #' @param end End date to get time series for
 #' 
-#' @param directory Directory where the files should be exported to. 
+#' @param directory Directory/path where the files should be exported to. 
 #' 
-#' @param progress Should a progress bar be displayed? 
+#' @param warn Should the function raise warnings? 
 #' 
 #' @param verbose Should the functions give messages? 
+#' 
+#' @param progress Should a progress bar be displayed? 
 #' 
 #' @author Stuart K. Grange
 #' 
@@ -25,8 +27,8 @@
 #' 
 #' @export
 export_decentlab_time_series <- function(domain, key, device, start, end,
-                                         directory, progress = FALSE, 
-                                         verbose = FALSE) {
+                                         directory, warn = TRUE, verbose = FALSE,
+                                         progress = FALSE) {
 
     # Get data and export daily files into a directory
     purrr::walk(
@@ -38,6 +40,7 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
         start = start,
         end = end,
         directory = directory,
+        warn = warn,
         verbose = verbose
       ),
       .progress = progress
@@ -49,7 +52,7 @@ export_decentlab_time_series <- function(domain, key, device, start, end,
 
 
 export_decentlab_time_series_worker <- function(domain, key, device, start,
-                                                end, directory, verbose) {
+                                                end, directory, warn, verbose) {
   
   # Get time series for sensor (called a device here)
   df <- get_decentlab_time_series(
@@ -60,6 +63,7 @@ export_decentlab_time_series_worker <- function(domain, key, device, start,
     end = end,
     as_wide = TRUE,
     tz = "UTC",
+    warn = warn,
     verbose = verbose
   )
   

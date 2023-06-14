@@ -12,9 +12,14 @@
 #' 
 #' @param end End date to get time series for
 #' 
-#' @param as_wide Should the return be in "wide" format? 
+#' @param as_wide Should the return be in "wide" format? The `as_wide` argument
+#' will not be honored if the device's data has a \code{channel} variable 
+#' because the wide format does not work well when this additional identifier is 
+#' present. 
 #' 
-#' @param tz Time-zone for the time series to be returned in. 
+#' @param tz Time zone for the time series to be returned in. 
+#' 
+#' @param warn Should the function raise warnings? 
 #' 
 #' @param verbose Should the functions give messages? 
 #' 
@@ -48,7 +53,8 @@
 #' @export
 get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA, 
                                       as_wide = FALSE, tz = "UTC", 
-                                      verbose = FALSE, progress = FALSE) {
+                                      warn = TRUE, verbose = FALSE, 
+                                      progress = FALSE) {
   
   device %>% 
     purrr::map(
@@ -60,6 +66,7 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
         end = end,
         as_wide = as_wide,
         tz = tz,
+        warn = warn,
         verbose = verbose
       ),
       .progress = progress
@@ -70,7 +77,7 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
 
 
 get_decentlab_time_series_worker <- function(domain, key, device, start, end, 
-                                             as_wide, tz, verbose) {
+                                             as_wide, tz, warn, verbose) {
   
   # Message to user
   if (verbose) {
@@ -153,7 +160,7 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   # Reshape to wide table if desired
   if (as_wide & !has_channel) {
     df <- tidyr::pivot_wider(df, names_from = sensor)
-  } else if (as_wide & has_channel) {
+  } else if (as_wide & has_channel & warn) {
     cli::cli_alert_warning(
       "Device's data has a `channel` variable, `as_wide` argument has been ignored."
     )

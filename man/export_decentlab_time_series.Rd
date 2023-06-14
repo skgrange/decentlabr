@@ -12,8 +12,9 @@ export_decentlab_time_series(
   start,
   end,
   directory,
-  progress = FALSE,
-  verbose = FALSE
+  warn = TRUE,
+  verbose = FALSE,
+  progress = FALSE
 )
 }
 \arguments{
@@ -27,11 +28,13 @@ export_decentlab_time_series(
 
 \item{end}{End date to get time series for}
 
-\item{directory}{Directory where the files should be exported to.}
+\item{directory}{Directory/path where the files should be exported to.}
 
-\item{progress}{Should a progress bar be displayed?}
+\item{warn}{Should the function raise warnings?}
 
 \item{verbose}{Should the functions give messages?}
+
+\item{progress}{Should a progress bar be displayed?}
 }
 \value{
 Invisible \code{domain}.
