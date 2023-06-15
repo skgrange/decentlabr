@@ -92,16 +92,23 @@ get_decentlab_time_series_worker <- function(domain, key, device, start, end,
   }
   
   # Parse missing dates
-  start <- parse_date_arguments(start, type = "start") %>% 
-    str_date_formatted(time_zone = FALSE, fractional_seconds = FALSE)
+  start <- parse_date_arguments(start, type = "start")
+  # Stop if input cannot be passed, happens when a bad date is parsed
+  if (is.na(start)) cli::cli_abort("`start` date cannot be passed.")
+  # Format for api
+  start <- str_date_formatted(start, time_zone = FALSE, fractional_seconds = FALSE)
   
   # If end is missing, push to the last instant of the day
   if (is.na(end[1])) {
     end <- (lubridate::today() + lubridate::days(1)) - lubridate::seconds(1)
     end <- as.character(end)
   } else {
-    end <- parse_date_arguments(end, type = "end") %>% 
-      str_date_formatted(time_zone = FALSE, fractional_seconds = FALSE)
+    # Try to pass
+    end <- parse_date_arguments(end, type = "end", quiet = TRUE)
+    # Stop if input cannot be passed, happens when a bad date is parsed
+    if (is.na(end)) cli::cli_abort("`end` date cannot be passed.")
+    # Format for api
+    end <- str_date_formatted(end, time_zone = FALSE, fractional_seconds = FALSE)
   }
   
   # Build time filter string

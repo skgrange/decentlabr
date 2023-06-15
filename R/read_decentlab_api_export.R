@@ -58,55 +58,55 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
   
-  # Try to determine sensor type from names, this will not work for sensors that
-  # have not been hard coded here
+  # Is the table in long format? 
+  is_long <- all(c("date", "date_unix", "device", "sensor", "value") %in% names(df))
+  
+  # If not long, make longer or rename sensor to variable to keep the logic 
+  # identical
+  if (!is_long) {
+    df <- tidyr::pivot_longer(
+      df, -c(date, date_unix, device), names_to = "variable"
+    )
+  } else {
+    df <- rename(df, variable = sensor)
+  }
+  
+  # Get unique variable elements
+  variable_unique <- unique(df$variable)
+  
+  # Determine determine sensor type, this will not work for sensors that have 
+  # not been hard coded here
   sensor_type <- dplyr::case_when(
-    any(stringr::str_detect(names(df), "hpp")) ~ "senseair_hpp",
-    any(stringr::str_detect(names(df), "senseair_lp8")) ~ "dl_lp8",
-    any(stringr::str_detect(names(df), "vaisala_gmp343")) ~ "vaisala_gmp343",
-    any(stringr::str_detect(names(df), "licor_li850")) ~ "licor_li850",
-    any(stringr::str_detect(names(df), "atmos22")) ~ "dl_atm22",
-    any(stringr::str_detect(names(df), "senseair_k96")) ~ "senseair_k96",
+    any(stringr::str_detect(variable_unique, "hpp")) ~ "senseair_hpp",
+    any(stringr::str_detect(variable_unique, "senseair_lp8|_last$")) ~ "dl_lp8",
+    any(stringr::str_detect(variable_unique, "vaisala_gmp343")) ~ "vaisala_gmp343",
+    any(stringr::str_detect(variable_unique, "licor_li850")) ~ "licor_li850",
+    any(stringr::str_detect(variable_unique, "atmos22")) ~ "dl_atm22",
+    any(stringr::str_detect(variable_unique, "k96")) ~ "senseair_k96",
     TRUE ~ NA_character_
   )
   
-  # Long data for k96 sensors
-  if (is.na(sensor_type) && any(stringr::str_detect(df$sensor, "k96"))) {
-    sensor_type <- "senseair_k96"
-    is_long <- TRUE
-  } else {
-    is_long <- FALSE
-  }
-  
-  # Clean table slightly
+  # Clean table slightly, only use unix time for dates
   df <- df %>% 
     rename(sensor_id = device) %>% 
     mutate(date = parse_unix_time(date_unix, tz = "UTC"),
+           sensor_id = as.character(sensor_id),
            sensor_type = !!sensor_type,
            .keep = "unused") %>% 
     relocate(date,
              sensor_id,
              sensor_type)
   
-  # Round dates to integers
+  # Round dates to nearest second/integer
   if (date_round) {
     df <- mutate(df, date = lubridate::round_date(date, "second"))
   }
   
-  # Make table longer, or at least rename variable to variable
-  if (!is_long) {
-    df <- tidyr::pivot_longer(
-      df, -c(date, sensor_id, sensor_type), names_to = "variable"
-    )
-  } else {
-    df <- rename(df, variable = sensor)
-  }
-
   # The k96 sensors have sensors within sensors
-  if (sensor_type == "senseair_k96" & is_long) {
+  if (sensor_type == "senseair_k96") {
 
     # Get the sensing elements within the sensor packages, usually three
-    df_sensing_elements <- df %>%
+    df_sensing_elements <- df %>% 
       filter(variable == "senseair_k96_sensor_id") %>%
       distinct(sensor_id,
                channel,
@@ -126,7 +126,11 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     # Not common variables require sensing_element_id
     df_not_common <- df %>% 
       filter(!is.na(channel)) %>% 
-      left_join(df_sensing_elements, by = join_by(sensor_id, channel))
+      left_join(
+        df_sensing_elements, 
+        by = join_by(sensor_id, channel), 
+        relationship = "many-to-one"
+      )
     
     # Bind again and drop channel
     df <- df_common %>% 
@@ -154,8 +158,8 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   if (sensor_type != "senseair_k96") {
     df <- join_sensing_element_id_by_date_range(df, df_sensing_elements_ranges)
   } else {
-    if (warn) {
-      cli::cli_alert_warning("Sensing element input has been ignored...")
+    if (warn & is.data.frame(df_sensing_elements_ranges)) {
+      cli::cli_alert_warning("`df_sensing_elements_ranges` input has been ignored...")
     }
   }
   
