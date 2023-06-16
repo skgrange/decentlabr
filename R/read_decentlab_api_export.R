@@ -58,7 +58,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
   
-  # Is the table in long format? 
+  # Is the table in long format?
   is_long <- all(c("date", "date_unix", "device", "sensor", "value") %in% names(df))
   
   # If not long, make longer or rename sensor to variable to keep the logic 
@@ -83,14 +83,20 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     any(stringr::str_detect(variable_unique, "licor_li850")) ~ "licor_li850",
     any(stringr::str_detect(variable_unique, "atmos22")) ~ "dl_atm22",
     any(stringr::str_detect(variable_unique, "k96")) ~ "senseair_k96",
-    TRUE ~ NA_character_
+    TRUE ~ "unknown"
   )
+  
+  # Raise a warning if sensor is unknown because some logic is based on sensor
+  # type
+  if (sensor_type == "unknown") {
+    cli::cli_alert_warning("Sensor type cannot be determined for `{file}`...")
+  }
   
   # Clean table slightly, only use unix time for dates
   df <- df %>% 
     rename(sensor_id = device) %>% 
     mutate(date = parse_unix_time(date_unix, tz = "UTC"),
-           sensor_id = as.character(sensor_id),
+           sensor_id = as.integer(sensor_id),
            sensor_type = !!sensor_type,
            .keep = "unused") %>% 
     relocate(date,
@@ -113,6 +119,15 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
                value) %>%
       rename(sensing_element_id = value) %>% 
       mutate(sensing_element_id = as.character(sensing_element_id))
+    
+    # There is a file that contains a duplicated channel and sensing element id
+    # pair, ignore this file for now
+    if (anyDuplicated(df_sensing_elements$channel) != 0L) {
+      cli::cli_alert_warning(
+        "`{file}` has duplicated `channel` and `sensing_element_ids`, this file has been ignored..."
+      )
+      return(tibble())
+    }
     
     # Replicate `nrow(df_sensing_elements)` times the common variables shared 
     # among all sensing elements
