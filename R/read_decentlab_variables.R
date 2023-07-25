@@ -61,7 +61,7 @@ read_decentlab_variables <- function() {
     "senseair_k96",   "senseair_k96_pressure_filtered",          "sensor_pressure",    
     "senseair_k96",   "senseair_k96_sensor_id",                  "sensing_element_id", 
     "senseair_k96",   "senseair_k96_status",                     "status",             
-    "senseair_k96",   "senseair_k96_temperature_bme280",         "sensor_temp",        
+    "senseair_k96",   "senseair_k96_temperature_ntc1",           "sensor_temp",        
     "senseair_k96",   "calibration_a",                           "calibration_a",      
     "senseair_k96",   "calibration_b",                           "calibration_b"
   )
