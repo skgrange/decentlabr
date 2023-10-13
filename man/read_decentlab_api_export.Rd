@@ -11,6 +11,7 @@ read_decentlab_api_export(
   df_sensing_elements_ranges = NA,
   variable_switch = FALSE,
   date_round = FALSE,
+  calculate_date = FALSE,
   warn = TRUE,
   progress = FALSE
 )
@@ -29,6 +30,13 @@ filtered to those contained in \code{\link{read_decentlab_variables}}.}
 
 \item{date_round}{Should the dates be rounded to seconds? Sometimes, the API
 returns data with sub-second accuracy.}
+
+\item{calculate_date}{Should the \code{date} variable calculated from the 
+API's date which represents the date when the data were inserted into the
+remote database and therefore represent the end of the measurement period 
+with a minor delay? The date from the API is renamed to \code{date_end} 
+(after being floor rounded) and both \code{date_round} and 
+\code{calculate_date} cannot be \code{TRUE}.}
 
 \item{warn}{Should the function raise warnings?}
 

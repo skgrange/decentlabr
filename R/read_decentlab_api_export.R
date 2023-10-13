@@ -15,7 +15,14 @@
 #' filtered to those contained in \code{\link{read_decentlab_variables}}.
 #' 
 #' @param date_round Should the dates be rounded to seconds? Sometimes, the API
-#' returns data with sub-second accuracy. 
+#' returns data with sub-second accuracy.
+#'
+#' @param calculate_date Should the \code{date} variable calculated from the 
+#' API's date which represents the date when the data were inserted into the
+#' remote database and therefore represent the end of the measurement period 
+#' with a minor delay? The date from the API is renamed to \code{date_end} 
+#' (after being floor rounded) and both \code{date_round} and 
+#' \code{calculate_date} cannot be \code{TRUE}. 
 #' 
 #' @param warn Should the function raise warnings? 
 #' 
@@ -30,9 +37,15 @@
 read_decentlab_api_export <- function(file, df_site_ranges = NA, 
                                       df_sensing_elements_ranges = NA,
                                       variable_switch = FALSE,
-                                      date_round = FALSE, warn = TRUE, 
-                                      progress = FALSE) {
+                                      date_round = FALSE, calculate_date = FALSE,
+                                      warn = TRUE, progress = FALSE) {
   
+  # Check for an incomparable pair of arguments
+  if (date_round & calculate_date) {
+    cli::cli_abort("Both `date_round` and `calculate_date` cannot be TRUE.")
+  }
+  
+  # Read each element in `file`
   purrr::map(
     file,
     ~read_decentlab_api_export_worker(
@@ -41,6 +54,7 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
       df_sensing_elements_ranges = df_sensing_elements_ranges,
       variable_switch = variable_switch,
       date_round = date_round,
+      calculate_date = calculate_date,
       warn = warn
     ),
     .progress = progress
@@ -53,7 +67,7 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
 read_decentlab_api_export_worker <- function(file, df_site_ranges, 
                                              df_sensing_elements_ranges,
                                              variable_switch, date_round,
-                                             warn) {
+                                             calculate_date, warn) {
   
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
@@ -83,7 +97,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     any(stringr::str_detect(variable_unique, "licor_li850")) ~ "licor_li850",
     any(stringr::str_detect(variable_unique, "atmos22")) ~ "dl_atm22",
     any(stringr::str_detect(variable_unique, "k96")) ~ "senseair_k96",
-    TRUE ~ "unknown"
+    .default = "unknown"
   )
   
   # Raise a warning if sensor is unknown because some logic is based on sensor
@@ -92,7 +106,10 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     cli::cli_alert_warning("Sensor type cannot be determined for `{file}`...")
   }
   
-  # Clean table slightly, only use unix time for dates
+  # Clean table slightly, only use unix time for dates, the dates represent
+  # the date when the data were received and inserted into the database so
+  # they can be delayed and represent the end of the measurement period, 
+  # whatever frequency that may be
   df <- df %>% 
     rename(sensor_id = device) %>% 
     mutate(date = parse_unix_time(date_unix, tz = "UTC"),
@@ -106,6 +123,27 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   # Round dates to nearest second/integer
   if (date_round) {
     df <- mutate(df, date = lubridate::round_date(date, "second"))
+  }
+  
+  # The logic to calculate date start (`date`) from `date_end` which is what the 
+  # dates are from the api
+  if (calculate_date) {
+    
+    # The measurement periods of the different sensor types
+    seconds_period <- dplyr::case_when(
+      sensor_type %in% c(
+        "senseair_hpp", "vaisala_gmp343", "licor_li850", "senseair_k96"
+      ) ~
+        60,
+      sensor_type %in% c("dl_lp8", "dl_atm22") ~ 600
+    )
+    
+    # Floor round date_end to the second and subtract the measurement period to
+    # calculate the starting date of the aggregation period
+    df <- df %>% 
+      mutate(date_end = lubridate::floor_date(date, "second"),
+             date = date_end - !!seconds_period)
+    
   }
   
   # The k96 sensors have sensors within sensors
@@ -174,7 +212,9 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     df <- join_sensing_element_id_by_date_range(df, df_sensing_elements_ranges)
   } else {
     if (warn & is.data.frame(df_sensing_elements_ranges)) {
-      cli::cli_alert_warning("`df_sensing_elements_ranges` input has been ignored...")
+      cli::cli_alert_warning(
+        "`df_sensing_elements_ranges` input has been ignored for a K96 sensor data file..."
+      )
     }
   }
   
@@ -184,7 +224,8 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
              sensing_element_id,
              sensor_type,
              site,
-             date) %>%
+             date,
+             dplyr::matches("date_end")) %>%
     arrange(sensor_id,
             variable,
             date)
@@ -205,13 +246,14 @@ join_sites_by_date_range <- function(df, df_ranges) {
   # Check ranges input
   # Check if the needed variables exist
   stopifnot(
-    c("sensor_id", "site", "date_start", "date_end") %in% names(df_ranges)
+    c("sensor_id", "site", "date_start_range", "date_end_range") %in%
+      names(df_ranges)
   )
   
   # Check if the data types are correct
   stopifnot(
-    lubridate::is.POSIXt(df_ranges$date_start), 
-    lubridate::is.POSIXt(df_ranges$date_end)
+    lubridate::is.POSIXt(df_ranges$date_start_range), 
+    lubridate::is.POSIXt(df_ranges$date_end_range)
   )
   
   # Do the join, a conditional or an inequality join
@@ -220,11 +262,11 @@ join_sites_by_date_range <- function(df, df_ranges) {
       df_ranges,
       by = join_by(
         sensor_id == sensor_id,
-        between(date, date_start, date_end)
+        between(date, date_start_range, date_end_range)
       )
     ) %>% 
-    select(-date_start,
-           -date_end)
+    select(-date_start_range,
+           -date_end_range)
 
   return(df)
   
@@ -242,22 +284,22 @@ join_sensing_element_id_by_date_range <- function(df, df_ranges) {
   # Check ranges input
   # Check if the needed variables exist
   stopifnot(
-    c("sensor_id", "sensing_element_id", "date_start", "date_end") %in% 
+    c("sensor_id", "sensing_element_id", "date_start_range", "date_end_range") %in% 
       names(df_ranges)
   )
   
   # Check if the data types are correct
   stopifnot(
-    lubridate::is.POSIXt(df_ranges$date_start), 
-    lubridate::is.POSIXt(df_ranges$date_end)
+    lubridate::is.POSIXt(df_ranges$date_start_range), 
+    lubridate::is.POSIXt(df_ranges$date_end_range)
   )
   
   # Select variables to use in join, no variable used here
   df_ranges <- df_ranges %>% 
     select(sensor_id,
            sensing_element_id,
-           date_start,
-           date_end)
+           date_start_range,
+           date_end_range)
   
   # Do the join, a conditional or an inequality join
   df <- df %>% 
@@ -265,11 +307,11 @@ join_sensing_element_id_by_date_range <- function(df, df_ranges) {
       df_ranges,
       by = join_by(
         sensor_id == sensor_id,
-        between(date, date_start, date_end)
+        between(date, date_start_range, date_end_range)
       )
     ) %>% 
-    select(-date_start,
-           -date_end)
+    select(-date_start_range,
+           -date_end_range)
   
   return(df)
   
