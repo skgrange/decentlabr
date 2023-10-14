@@ -12,6 +12,7 @@ read_decentlab_api_export(
   variable_switch = FALSE,
   date_round = FALSE,
   calculate_date = FALSE,
+  distinct = FALSE,
   warn = TRUE,
   progress = FALSE
 )
@@ -37,6 +38,9 @@ remote database and therefore represent the end of the measurement period
 with a minor delay? The date from the API is renamed to \code{date_end} 
 (after being floor rounded) and both \code{date_round} and 
 \code{calculate_date} cannot be \code{TRUE}.}
+
+\item{distinct}{Should only distinct sensor-variable-date combinations be 
+returned? Duplicated dates are very rare, but can occur.}
 
 \item{warn}{Should the function raise warnings?}
 

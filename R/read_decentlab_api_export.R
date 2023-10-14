@@ -24,6 +24,9 @@
 #' (after being floor rounded) and both \code{date_round} and 
 #' \code{calculate_date} cannot be \code{TRUE}. 
 #' 
+#' @param distinct Should only distinct sensor-variable-date combinations be 
+#' returned? Duplicated dates are very rare, but can occur.
+#' 
 #' @param warn Should the function raise warnings? 
 #' 
 #' @param progress Should a progress bar be displayed? 
@@ -38,7 +41,8 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
                                       df_sensing_elements_ranges = NA,
                                       variable_switch = FALSE,
                                       date_round = FALSE, calculate_date = FALSE,
-                                      warn = TRUE, progress = FALSE) {
+                                      distinct = FALSE, warn = TRUE, 
+                                      progress = FALSE) {
   
   # Check for an incomparable pair of arguments
   if (date_round & calculate_date) {
@@ -55,6 +59,7 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
       variable_switch = variable_switch,
       date_round = date_round,
       calculate_date = calculate_date,
+      distinct = distinct,
       warn = warn
     ),
     .progress = progress
@@ -66,8 +71,8 @@ read_decentlab_api_export <- function(file, df_site_ranges = NA,
 
 read_decentlab_api_export_worker <- function(file, df_site_ranges, 
                                              df_sensing_elements_ranges,
-                                             variable_switch, date_round,
-                                             calculate_date, warn) {
+                                             variable_switch, date_round, 
+                                             calculate_date, distinct, warn) {
   
   # Read file
   df <- readr::read_csv(file, progress = FALSE, show_col_types = FALSE)
@@ -143,6 +148,28 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     df <- df %>% 
       mutate(date_end = lubridate::floor_date(date, "second"),
              date = date_end - !!seconds_period)
+    
+  }
+  
+  # Remove duplicated observations, very rare
+  if (distinct) {
+    
+    # Get row count before distinct call
+    nrow_pre_distinct <- nrow(df)
+    
+    # Drop duplicated sensor-date-variable combinations
+    df <- df %>% 
+      distinct(date,
+               sensor_id,
+               variable,
+               .keep_all = TRUE)
+    
+    # Test if duplicated dates were removed
+    if (nrow(df) < nrow_pre_distinct) {
+      cli::cli_alert_info(
+        "{threadr::cli_date()} Duplicated dates detected, these have been removed..."
+      )
+    }
     
   }
   
