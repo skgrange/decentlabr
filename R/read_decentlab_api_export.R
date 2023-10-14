@@ -152,7 +152,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
   }
   
   # Remove duplicated observations, very rare
-  if (distinct) {
+  if (distinct && sensor_type != "senseair_k96") {
     
     # Get row count before distinct call
     nrow_pre_distinct <- nrow(df)

@@ -1,7 +1,7 @@
 Package: decentlabr
 Type: Package
 Title: An R Interface to the Decentlab API
-Version: 0.1.016
+Version: 0.1.017
 Date: 2023-10-14
 Authors@R: person("Stuart K.", "Grange", email = "stuart.grange@york.ac.uk", 
     role = c("cre", "aut"), comment = c(ORCID = "0000-0003-4093-3596"))
