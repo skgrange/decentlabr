@@ -23,7 +23,7 @@ list_decentlab_api_files <- function(path, select = TRUE) {
     fs::file_info() %>% 
     mutate(file = fs::path_file(path),
            date = stringr::str_split_fixed(file, "_device", n = 2)[, 1],
-           date = lubridate::ymd(date, tz = "UTC"),
+           date = lubridate::ymd_hms(date, truncated = 3, tz = "UTC"),
            device = stringr::str_split_fixed(file, "device_|_decent", n = 3)[, 2],
            device = as.integer(device)) %>% 
     arrange(device,
