@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_decentlab_last_values.R
 \name{get_decentlab_last_values}
 \alias{get_decentlab_last_values}
-\title{Function to get final observational data from the Decentlab API.}
+\title{Function to get final observational data from Decentlab's API.}
 \usage{
 get_decentlab_last_values(
   domain,

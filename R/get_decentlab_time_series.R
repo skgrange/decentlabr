@@ -1,4 +1,4 @@
-#' Function to get observational data from the Decentlab API.
+#' Function to get observational data from Decentlab's API.
 #' 
 #' @author Stuart K. Grange
 #' 

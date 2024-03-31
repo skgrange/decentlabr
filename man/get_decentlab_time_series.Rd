@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_decentlab_time_series.R
 \name{get_decentlab_time_series}
 \alias{get_decentlab_time_series}
-\title{Function to get observational data from the Decentlab API.}
+\title{Function to get observational data from Decentlab's API.}
 \usage{
 get_decentlab_time_series(
   domain,
@@ -45,7 +45,7 @@ identifier is present.}
 Tibble.
 }
 \description{
-Function to get observational data from the Decentlab API.
+Function to get observational data from Decentlab's API.
 }
 \examples{
 

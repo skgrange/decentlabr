@@ -1,4 +1,4 @@
-#' Function to get final observational data from the Decentlab API. 
+#' Function to get final observational data from Decentlab's API. 
 #' 
 #' \code{get_decentlab_last_values} can be used to "probe" or "prime" the API to 
 #' ensure the API is active and responding and explore what devices and sensors
@@ -36,12 +36,12 @@ get_decentlab_last_values <- function(domain, key, pause = 5, max_times = 3,
   settings_rate <- purrr::rate_delay(pause = pause, max_times = max_times)
   
   # Wrap worker function
-  get_decentlab_last_values_worker_inconsistent <- purrr::insistently(
+  get_decentlab_last_values_worker_insistent <- purrr::insistently(
     get_decentlab_last_values_worker, rate = settings_rate, quiet = !verbose
   )
   
   # Get last values, potentially by running the function multiple times
-  df <- get_decentlab_last_values_worker_inconsistent(domain, key)
+  df <- get_decentlab_last_values_worker_insistent(domain, key)
   
   return(df)
   
