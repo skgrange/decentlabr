@@ -2,20 +2,36 @@
 % Please edit documentation in R/get_decentlab_last_values.R
 \name{get_decentlab_last_values}
 \alias{get_decentlab_last_values}
-\title{Function to get observational data from the Decentlab API.}
+\title{Function to get final observational data from the Decentlab API.}
 \usage{
-get_decentlab_last_values(domain, key)
+get_decentlab_last_values(
+  domain,
+  key,
+  pause = 5,
+  max_times = 3,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{domain}{A Decentlab API domain.}
 
 \item{key}{A Decentlab API key for \code{domain}.}
+
+\item{pause}{Number of seconds to pause or sleep for if the API fails to
+respond.}
+
+\item{max_times}{Number of times to attempt to get data from the API if it 
+fails to respond.}
+
+\item{verbose}{Should the function give messages?}
 }
 \value{
 Tibble.
 }
 \description{
-Function to get observational data from the Decentlab API.
+\code{get_decentlab_last_values} can be used to "probe" or "prime" the API to 
+ensure the API is active and responding and explore what devices and sensors
+a domain (or user) has access to.
 }
 \examples{
 
