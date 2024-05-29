@@ -138,8 +138,7 @@ read_decentlab_api_export_worker <- function(file, df_site_ranges,
     seconds_period <- dplyr::case_when(
       sensor_type %in% c(
         "senseair_hpp", "vaisala_gmp343", "licor_li850", "senseair_k96"
-      ) ~
-        60,
+      ) ~ 60,
       sensor_type %in% c("dl_lp8", "dl_atm22") ~ 600
     )
     
