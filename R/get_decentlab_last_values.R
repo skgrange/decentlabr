@@ -32,6 +32,11 @@
 get_decentlab_last_values <- function(domain, key, pause = 5, max_times = 3,
                                       verbose = FALSE) {
   
+  # Check if credentials have been passed
+  if (missing(domain) | missing(key)) {
+    cli::cli_abort("Credentials (`domain` and `key`) must be supplied.")
+  }
+  
   # Set up settings for potentially multiple runs
   settings_rate <- purrr::rate_delay(pause = pause, max_times = max_times)
   

@@ -56,6 +56,12 @@ get_decentlab_time_series <- function(domain, key, device, start = NA, end = NA,
                                       warn = TRUE, verbose = FALSE, 
                                       progress = FALSE) {
   
+  # Check if credentials have been passed
+  if (missing(domain) | missing(key)) {
+    cli::cli_abort("Credentials (`domain` and `key`) must be supplied.")
+  }
+  
+  # Get observations by device/sensor
   device %>% 
     purrr::map(
       ~get_decentlab_time_series_worker(
